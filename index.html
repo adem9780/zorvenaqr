@@ -1,0 +1,482 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZORVENA QR</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #f5f5f5;
+    color: #111;
+    font-family: Arial, sans-serif;
+}
+
+header {
+    background: #080808;
+    color: white;
+    padding: 22px 7%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 25px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.logo span {
+    color: #999;
+}
+
+header small {
+    color: #bbb;
+}
+
+.hero {
+    text-align: center;
+    padding: 55px 15px 30px;
+}
+
+.hero h1 {
+    font-size: 36px;
+    margin-bottom: 12px;
+}
+
+.hero p {
+    color: #666;
+    font-size: 16px;
+}
+
+.container {
+    max-width: 900px;
+    margin: 20px auto 60px;
+    padding: 15px;
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tabs button {
+    flex: 1;
+    padding: 15px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.tabs button.active {
+    background: #080808;
+    color: white;
+}
+
+.panel {
+    background: white;
+    border: 1px solid #e5e5e5;
+    border-radius: 15px;
+    padding: 25px;
+}
+
+h2 {
+    margin-bottom: 20px;
+    font-size: 23px;
+}
+
+label {
+    display: block;
+    margin: 15px 0 8px;
+    font-weight: bold;
+}
+
+input, select {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    background: white;
+}
+
+.main-btn {
+    width: 100%;
+    background: #080808;
+    color: white;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    margin-top: 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.main-btn:hover {
+    background: #333;
+}
+
+#qrResult {
+    display: flex;
+    justify-content: center;
+    margin: 25px auto;
+    padding: 15px;
+    min-height: 10px;
+}
+
+#qrResult canvas,
+#qrResult img {
+    max-width: 100%;
+    height: auto;
+}
+
+.download-btn {
+    display: none;
+    background: white;
+    border: 1px solid #111;
+    padding: 13px;
+    width: 100%;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+}
+
+#reader {
+    width: 100%;
+    max-width: 450px;
+    margin: 20px auto;
+}
+
+#scanResult {
+    padding: 15px;
+    background: #f2f2f2;
+    border-radius: 8px;
+    margin-top: 15px;
+    word-break: break-word;
+    display: none;
+}
+
+footer {
+    background: #080808;
+    color: #aaa;
+    text-align: center;
+    padding: 25px;
+}
+
+footer strong {
+    color: white;
+}
+
+@media(max-width: 500px) {
+    .hero h1 {
+        font-size: 28px;
+    }
+    .panel {
+        padding: 18px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">ZORVENA <span>QR</span></div>
+    <small>Smart QR Solutions</small>
+</header>
+
+<section class="hero">
+    <h1>Welcome to ZORVENA QR</h1>
+    <p>أنشئ واقرأ رموز QR بسهولة ومجاناً</p>
+</section>
+
+<main class="container">
+
+    <div class="tabs">
+        <button id="generateTab" class="active"
+        onclick="showTab('generate')">إنشاء QR</button>
+
+        <button id="scanTab"
+        onclick="showTab('scan')">قراءة QR</button>
+    </div>
+
+    <!-- GENERATOR -->
+
+    <section id="generatePanel" class="panel">
+
+        <h2>إنشاء رمز QR</h2>
+
+        <label>نوع الرمز</label>
+
+        <select id="qrType" onchange="updatePlaceholder()">
+            <option value="text">نص أو رابط</option>
+            <option value="phone">رقم هاتف</option>
+        </select>
+
+        <label>أدخل المعلومات</label>
+
+        <input id="qrInput"
+        type="text"
+        placeholder="اكتب الرابط أو النص هنا">
+
+        <button class="main-btn" onclick="generateQR()">
+            إنشاء رمز QR
+        </button>
+
+        <div id="qrResult"></div>
+
+        <button id="downloadBtn"
+        class="download-btn"
+        onclick="downloadQR()">
+            تحميل QR بصيغة PNG
+        </button>
+
+        <p id="message" style="text-align:center;margin-top:15px;color:#c00;"></p>
+
+    </section>
+
+    <!-- SCANNER -->
+
+    <section id="scanPanel" class="panel hidden">
+
+        <h2>قراءة رمز QR</h2>
+
+        <p style="color:#666">
+            اسمح للمتصفح باستعمال الكاميرا لقراءة الرمز.
+        </p>
+
+        <button class="main-btn" onclick="startScanner()">
+            تشغيل الكاميرا
+        </button>
+
+        <button class="main-btn"
+        style="background:white;color:black;border:1px solid #111"
+        onclick="stopScanner()">
+            إيقاف الكاميرا
+        </button>
+
+        <div id="reader"></div>
+
+        <div id="scanResult">
+            <strong>المحتوى المقروء:</strong>
+            <p id="scanText" style="margin-top:10px"></p>
+            <button class="main-btn" onclick="copyResult()">
+                نسخ النتيجة
+            </button>
+            <a id="openLink" target="_blank" rel="noopener noreferrer"
+            style="display:none;margin-top:15px;color:black">
+                فتح الرابط
+            </a>
+        </div>
+
+        <p id="scanMessage" style="margin-top:15px;color:#c00"></p>
+
+    </section>
+
+</main>
+
+<footer>
+    <strong>ZORVENA QR</strong>
+    <p style="margin-top:10px">
+        Simple. Smart. Free.
+    </p>
+    <p style="margin-top:10px;font-size:12px">
+        © 2026 ZORVENA 7. All Rights Reserved.
+    </p>
+</footer>
+
+<script>
+
+let qrCode = null;
+let scanner = null;
+let scanning = false;
+
+function showTab(tab) {
+
+    document.getElementById("generatePanel").classList.toggle(
+        "hidden", tab !== "generate"
+    );
+
+    document.getElementById("scanPanel").classList.toggle(
+        "hidden", tab !== "scan"
+    );
+
+    document.getElementById("generateTab").classList.toggle(
+        "active", tab === "generate"
+    );
+
+    document.getElementById("scanTab").classList.toggle(
+        "active", tab === "scan"
+    );
+
+    if(tab === "generate") stopScanner();
+}
+
+function updatePlaceholder() {
+    const type = document.getElementById("qrType").value;
+    const input = document.getElementById("qrInput");
+
+    input.placeholder = type === "phone"
+        ? "أدخل رقم الهاتف"
+        : "اكتب الرابط أو النص هنا";
+}
+
+function generateQR() {
+
+    const input = document.getElementById("qrInput").value.trim();
+    const type = document.getElementById("qrType").value;
+
+    const result = document.getElementById("qrResult");
+    const message = document.getElementById("message");
+    const download = document.getElementById("downloadBtn");
+
+    message.textContent = "";
+    result.innerHTML = "";
+    download.style.display = "none";
+
+    if(!input) {
+        message.textContent = "يرجى إدخال المعلومات أولاً.";
+        return;
+    }
+
+    let value = input;
+
+    if(type === "phone") {
+        if(!/^\+?[0-9\s-]{6,20}$/.test(input)) {
+            message.textContent = "يرجى إدخال رقم هاتف صحيح.";
+            return;
+        }
+        value = "tel:" + input.replace(/[\s-]/g, "");
+    }
+
+    try {
+
+        qrCode = new QRCode(result, {
+            text: value,
+            width: 240,
+            height: 240,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+
+        download.style.display = "block";
+
+    } catch(error) {
+        message.textContent = "حدث خطأ أثناء إنشاء الرمز.";
+    }
+}
+
+function downloadQR() {
+
+    const result = document.getElementById("qrResult");
+
+    const canvas = result.querySelector("canvas");
+
+    if(!canvas) {
+        alert("أنشئ رمز QR أولاً.");
+        return;
+    }
+
+    const link = document.createElement("a");
+
+    link.download = "ZORVENA-QR.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+}
+
+async function startScanner() {
+
+    if(scanning) return;
+
+    const message = document.getElementById("scanMessage");
+    message.textContent = "";
+
+    try {
+
+        if(!scanner) {
+            scanner = new Html5Qrcode("reader");
+        }
+
+        scanning = true;
+
+        await scanner.start(
+            { facingMode: "environment" },
+            {
+                fps: 10,
+                qrbox: { width: 230, height: 230 }
+            },
+            (decodedText) => {
+
+                document.getElementById("scanText").textContent = decodedText;
+
+                const box = document.getElementById("scanResult");
+                const link = document.getElementById("openLink");
+
+                box.style.display = "block";
+                link.style.display = "none";
+
+                try {
+                    const url = new URL(decodedText);
+
+                    if(url.protocol === "https:" || url.protocol === "http:") {
+                        link.href = url.href;
+                        link.style.display = "inline-block";
+                    }
+                } catch(e) {}
+
+                stopScanner();
+            }
+        );
+
+    } catch(error) {
+        scanning = false;
+        message.textContent =
+            "تعذر تشغيل الكاميرا. تأكد من السماح للمتصفح باستعمالها وأن الموقع يعمل عبر HTTPS.";
+    }
+}
+
+async function stopScanner() {
+
+    if(scanner && scanning) {
+        try {
+            await scanner.stop();
+        } catch(e) {}
+        scanning = false;
+    }
+}
+
+function copyResult() {
+
+    const text = document.getElementById("scanText").textContent;
+
+    if(navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text)
+        .then(() => alert("تم نسخ النتيجة"))
+        .catch(() => alert("تعذر النسخ"));
+    } else {
+        alert("النسخ غير متاح في هذه الصفحة.");
+    }
+}
+
+</script>
+
+</body>
+</html>
